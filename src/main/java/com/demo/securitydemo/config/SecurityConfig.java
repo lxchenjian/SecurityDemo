@@ -29,9 +29,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .formLogin(Customizer.withDefaults())
             .authorizeRequests(authorizeRequests -> authorizeRequests
                     //There was an unexpected error (type=Forbidden, status=403).
-                    .antMatchers("/api/**").hasRole("ADMIN")
+                    //.antMatchers("/api/**").hasRole("ADMIN")
+                    .antMatchers("/api/**").authenticated()
             );
     }
 
