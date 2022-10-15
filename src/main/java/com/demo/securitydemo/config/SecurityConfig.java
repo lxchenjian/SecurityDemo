@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -25,20 +26,47 @@ import java.util.Map;
 @EnableWebSecurity(debug = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+
+    /***
+     * 配置真正路径的安全性*
+     * @param http
+     * @throws Exception
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-//        http
-//                .formLogin(Customizer.withDefaults())
-//            .authorizeRequests(authorizeRequests -> authorizeRequests
-//                    //There was an unexpected error (type=Forbidden, status=403).
-//                    //.antMatchers("/api/**").hasRole("ADMIN")
-//                    .antMatchers("/api/**").authenticated()
-//            );
+    //配置一：
+        //        http
+    //                .formLogin(Customizer.withDefaults())
+    //            .authorizeRequests(authorizeRequests -> authorizeRequests
+    //                    //There was an unexpected error (type=Forbidden, status=403).
+    //                    //.antMatchers("/api/**").hasRole("ADMIN")
+    //                    .antMatchers("/api/**").authenticated()
+    //            );
+
+    //配置二：
         //post请求 报错CSRF Invalid CSRF token found for
         http.csrf(csrf ->csrf.disable()).httpBasic(Customizer.withDefaults())
                 .formLogin(form ->form.loginPage("/"));
+
+        //配置三：
+        http.authorizeHttpRequests(req ->req.antMatchers("/api/**").authenticated())
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable);
+
+
     }
 
 
+    /***
+     * 配置静态资源的忽略
+     * * @param web
+     * @throws Exception
+     */
+    @Override
+    public void configure(WebSecurity web) throws Exception{
+        web.ignoring().mvcMatchers("/public/**");
+
+    }
 
 }
