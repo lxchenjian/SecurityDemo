@@ -20,6 +20,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -45,12 +46,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     //配置二：
         //post请求 报错CSRF Invalid CSRF token found for
-        http.csrf(csrf ->csrf.disable()).httpBasic(Customizer.withDefaults())
-                .formLogin(form ->form.loginPage("/"));
+//        http.csrf(csrf ->csrf.disable()).httpBasic(Customizer.withDefaults())
+//                .formLogin(form ->form.loginPage("/"));
 
         //配置三：
         http.authorizeHttpRequests(req ->req.antMatchers("/api/**").authenticated())
-                .formLogin(AbstractHttpConfigurer::disable)
+                //.formLogin(AbstractHttpConfigurer::disable)
+                .formLogin(form->form.loginPage("/login"))
                 .httpBasic(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable);
 
@@ -65,7 +67,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     public void configure(WebSecurity web) throws Exception{
-        web.ignoring().mvcMatchers("/public/**");
+                //界面
+        web.ignoring().mvcMatchers("/public/**")
+                //解决样式问题
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
 
     }
 
