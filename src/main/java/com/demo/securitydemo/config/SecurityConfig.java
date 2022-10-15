@@ -23,18 +23,20 @@ import java.util.ArrayList;
 import java.util.Map;
 
 @EnableWebSecurity(debug = true)
-@Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-                .formLogin(Customizer.withDefaults())
-            .authorizeRequests(authorizeRequests -> authorizeRequests
-                    //There was an unexpected error (type=Forbidden, status=403).
-                    //.antMatchers("/api/**").hasRole("ADMIN")
-                    .antMatchers("/api/**").authenticated()
-            );
+//        http
+//                .formLogin(Customizer.withDefaults())
+//            .authorizeRequests(authorizeRequests -> authorizeRequests
+//                    //There was an unexpected error (type=Forbidden, status=403).
+//                    //.antMatchers("/api/**").hasRole("ADMIN")
+//                    .antMatchers("/api/**").authenticated()
+//            );
+        //post请求 报错CSRF Invalid CSRF token found for
+        http.csrf(csrf ->csrf.disable()).httpBasic(Customizer.withDefaults())
+                .formLogin(form ->form.loginPage("/"));
     }
 
 
