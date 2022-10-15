@@ -50,12 +50,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //                .formLogin(form ->form.loginPage("/"));
 
         //配置三：
-        http.authorizeHttpRequests(req ->req.antMatchers("/api/**").authenticated())
+        http.authorizeHttpRequests(
+                req ->req.anyRequest().authenticated())
                 //.formLogin(AbstractHttpConfigurer::disable)
-                .formLogin(form->form.loginPage("/login"))
-                .httpBasic(Customizer.withDefaults())
-                .csrf(AbstractHttpConfigurer::disable);
-
+                .formLogin(form->form.loginPage("/login").permitAll())
+                .csrf(Customizer.withDefaults())
+                .logout(logout ->logout.logoutUrl("/perform_logout"))
+                .rememberMe(rememberMe -> rememberMe
+                .key("someSecret")
+                .tokenValiditySeconds(86400))
+                .httpBasic(Customizer.withDefaults()); // 显示浏览器对话框，需要禁用 CSRF ，或添加路径到忽略列表
 
     }
 
@@ -67,11 +71,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     public void configure(WebSecurity web) throws Exception{
-                //界面
-        web.ignoring().mvcMatchers("/public/**")
+                //界面 安全验证
+        web.ignoring().mvcMatchers("/public/**","/error")
                 //解决样式问题
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
 
+    }
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws  Exception{
+        auth.inMemoryAuthentication()
+                .withUser("user")
+                .password(passwordEncoder().encode("12345678"))
+                .roles("USER","ADMIN");
+
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
     }
 
 }

@@ -22,17 +22,20 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/webjars/**")
-                .addResourceLocations("/webjars")
+                .addResourceLocations("/webjars/")
                 .resourceChain(false);
         registry.setOrder(1);
-
     }
 
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/login").setViewName("login");
+        registry.addViewController("/").setViewName("index");
+
         registry.setOrder(HIGHEST_PRECEDENCE);
 
     }
+
+
 }
