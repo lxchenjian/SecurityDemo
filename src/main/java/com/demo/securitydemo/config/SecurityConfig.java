@@ -1,6 +1,8 @@
 package com.demo.securitydemo.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,8 +24,11 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
+
+@Slf4j
 @EnableWebSecurity(debug = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -53,7 +58,27 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeHttpRequests(
                 req ->req.anyRequest().authenticated())
                 //.formLogin(AbstractHttpConfigurer::disable)
-                .formLogin(form->form.loginPage("/login").permitAll())
+                .formLogin(form->form.loginPage("/login").permitAll()
+                        .defaultSuccessUrl("/")
+                        .successHandler((req,res,auth) ->{
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            res.setStatus(HttpStatus.OK.value());
+                            res.getWriter().println(objectMapper.writeValueAsString(auth));
+                            log.debug("认证成功");
+                        })
+                        .failureHandler((req,res,exp) -> {
+                            val objectMapper = new ObjectMapper();
+                            res.setStatus(HttpStatus.UNAUTHORIZED.value());
+                            res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            res.setCharacterEncoding("UTF-8");
+                            Map map = new HashMap();
+                            map.put("title","认证失败");
+                            map.put("details",exp.getMessage());
+                            val errData = map;
+                            res.getWriter().println(objectMapper.writeValueAsString(errData));
+                        })
+                )
+
                 .csrf(Customizer.withDefaults())
                 .logout(logout ->logout.logoutUrl("/perform_logout"))
                 .rememberMe(rememberMe -> rememberMe
